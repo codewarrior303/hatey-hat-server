@@ -1,5 +1,5 @@
 import { Router } from "express";
-import type { Filter } from "mongodb";
+import type { Filter, ObjectId } from "mongodb";
 import { getDb } from "../db/client.js";
 import { verifyJwt } from "../middleware/verifyJwt.js";
 import { validateBody } from "../middleware/validate.js";
@@ -89,12 +89,68 @@ router.get("/:id", async (req, res) => {
   res.json({ success: true, data: { ...event, participants } });
 });
 
+/**
+ * Ensures that no other event exists with the same category (`eventType`)
+ * at the same location on the same day & date/time.
+ * Throws 409 Conflict if an overlapping event already exists.
+ */
+async function checkEventSchedulingConflict(
+  eventType: string,
+  location: string,
+  eventDate: Date,
+  excludeEventId?: ObjectId
+) {
+  const target = new Date(eventDate);
+  // Full calendar day boundaries in UTC
+  const dayStart = new Date(target);
+  dayStart.setUTCHours(0, 0, 0, 0);
+  const dayEnd = new Date(target);
+  dayEnd.setUTCHours(23, 59, 59, 999);
+
+  // Escaped regex for case-insensitive, whitespace-trimmed location comparison
+  const escapedLocation = escapeRegex(location.trim());
+
+  const filter: any = {
+    eventType,
+    location: { $regex: new RegExp(`^${escapedLocation}$`, "i") },
+    $or: [
+      { eventDate: { $gte: dayStart, $lte: dayEnd } },
+      {
+        eventDate: {
+          $gte: new Date(target.getTime() - 8 * 3600 * 1000),
+          $lte: new Date(target.getTime() + 8 * 3600 * 1000),
+        },
+      },
+    ],
+  };
+
+  if (excludeEventId) {
+    filter._id = { $ne: excludeEventId };
+  }
+
+  const existing = await (await events()).findOne(filter);
+  if (existing) {
+    const formattedDate = target.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+    throw ApiError.conflict(
+      `An initiative ("${existing.title}") is already scheduled for "${eventType}" at "${existing.location}" on ${formattedDate}. Only 1 event per category and location is allowed on the same day.`
+    );
+  }
+}
+
 /** POST /api/events – create. Creator identity comes from the verified JWT only. */
 router.post("/", writeLimiter, verifyJwt, validateBody(createEventSchema), async (req, res) => {
   const user = req.user!;
   const body = req.body as CreateEventInput;
   const now = new Date();
   const clientIp = getClientIp(req);
+
+  // Enforce conflict protection: prevent multiple events with same category and location on the same day
+  await checkEventSchedulingConflict(body.eventType, body.location, body.eventDate);
 
   const doc: EventDoc = {
     ...body,
@@ -145,6 +201,14 @@ router.patch("/:id", writeLimiter, verifyJwt, validateBody(updateEventSchema), a
   const event = await findOwnedEvent(req.params.id, req.user!.email, req);
   const body = req.body as UpdateEventInput;
   const clientIp = getClientIp(req);
+
+  // If category, location, or eventDate changed, verify scheduling conflict against other events
+  if (body.eventType || body.location || body.eventDate) {
+    const checkType = body.eventType || event.eventType;
+    const checkLocation = body.location || event.location;
+    const checkDate = body.eventDate ? new Date(body.eventDate) : event.eventDate;
+    await checkEventSchedulingConflict(checkType, checkLocation, checkDate, event._id);
+  }
 
   const updated = await (await events()).findOneAndUpdate(
     { _id: event._id },

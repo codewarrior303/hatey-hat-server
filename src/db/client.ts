@@ -19,6 +19,7 @@ async function ensureIndexes(db: Db) {
       // Events indexes
       db.collection("events").createIndex({ eventDate: 1 }, { name: "idx_events_eventDate" }),
       db.collection("events").createIndex({ creatorEmail: 1, eventDate: 1 }, { name: "idx_events_creator_date" }),
+      db.collection("events").createIndex({ eventType: 1, location: 1, eventDate: 1 }, { name: "idx_events_conflict_check" }),
 
       // Joins unique constraint index (prevents duplicate joins at the database layer)
       db.collection("joins").createIndex({ eventId: 1, userEmail: 1 }, { unique: true, name: "unique_event_user" }),
