@@ -9,6 +9,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
+    "test:security": "tsx src/scripts/security-test.ts",
     "seed": "tsx src/scripts/seed.ts"
   },
   "engines": {

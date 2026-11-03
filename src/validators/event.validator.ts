@@ -56,14 +56,17 @@ export const updateEventSchema = createEventSchema
   .strict()
   .refine((value) => Object.keys(value).length > 0, "Provide at least one field to update");
 
-export const listEventsQuerySchema = z.object({
-  search: z.string().trim().max(100, "Search is too long").optional(),
-  type: z
-    .union([z.enum(EVENT_TYPES), z.literal(""), z.literal("all")])
-    .optional()
-    .transform((value) => (value && value !== "all" ? value : undefined)),
-  limit: z.coerce.number().int().min(1, "Limit must be at least 1").max(60, "Limit must be at most 60").optional(),
-}).strict();
+export const listEventsQuerySchema = z
+  .object({
+    search: z.string().trim().max(100, "Search is too long").optional(),
+    type: z
+      .union([z.enum(EVENT_TYPES), z.literal(""), z.literal("all")])
+      .optional()
+      .transform((value) => (value && value !== "all" ? value : undefined)),
+    limit: z.coerce.number().int().min(1, "Limit must be at least 1").max(60, "Limit must be at most 60").optional(),
+    page: z.coerce.number().int().min(1, "Page must be at least 1").max(1000, "Page must be at most 1000").optional(),
+  })
+  .strict();
 
 export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;
