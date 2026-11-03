@@ -13,6 +13,7 @@ const authUrl = `http://127.0.0.1:${(jwksServer.address() as any).port}`;
 
 process.env.CLIENT_URL = "http://localhost:3000";
 process.env.AUTH_URL = authUrl;
+process.env.MONGODB_DB = "hatey-hat-test";
 
 const sign = (email: string, name: string, opts: { exp?: string; iss?: string; aud?: string; key?: any; alg?: string } = {}) =>
   new SignJWT({ id: email, email, name })
@@ -169,7 +170,14 @@ console.table(results);
 
 srv.close();
 jwksServer.close();
-const { closeDb } = await import("../db/client.js");
+const { getDb, closeDb } = await import("../db/client.js");
+try {
+  const testDb = await getDb();
+  await testDb.dropDatabase();
+  console.log("Cleaned up temporary test database 'hatey-hat-test'.");
+} catch (err) {
+  console.error("Failed to drop test database:", err);
+}
 await closeDb();
 
 const allPassed = results.every((r) => r.status === "Passed");

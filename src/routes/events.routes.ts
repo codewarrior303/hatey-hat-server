@@ -38,6 +38,30 @@ router.get("/", async (req, res) => {
   res.json({ success: true, count: data.length, data });
 });
 
+/** GET /api/events/stats/summary – live metrics from real database (honest numbers) */
+router.get("/stats/summary", async (_req, res) => {
+  const now = new Date();
+  const eventsColl = await events();
+  const joinsColl = await joins();
+
+  const [upcomingCount, totalJoins, distinctTypes, distinctLocations] = await Promise.all([
+    eventsColl.countDocuments({ eventDate: { $gt: now } }),
+    joinsColl.countDocuments({}),
+    eventsColl.distinct("eventType"),
+    eventsColl.distinct("location"),
+  ]);
+
+  res.json({
+    success: true,
+    data: {
+      upcomingEvents: upcomingCount,
+      totalJoins,
+      categoriesCount: distinctTypes.length,
+      locationsCount: distinctLocations.length,
+    },
+  });
+});
+
 /** GET /api/events/my – events created by the logged-in user. Must be declared before /:id. */
 router.get("/my", verifyJwt, async (req, res) => {
   const user = req.user!;
