@@ -4,6 +4,9 @@
 
 Express + TypeScript REST API for **Hatey Hat**, a community-driven platform for creating, joining and tracking social service events around Dhaka.
 
+**Live API URL:** [https://hatey-hat-api.vercel.app](https://hatey-hat-api.vercel.app)  
+**Client Web App:** [https://hatey-hat.vercel.app](https://hatey-hat.vercel.app)
+
 ## Stack
 
 - Express 5 + TypeScript (ESM)
