@@ -80,7 +80,7 @@ record("2. Garbage token returns 401", "401", `${r.status}`, r.status === 401);
 
 // Test 3: Tampered signature returns 401
 const [h, p, s] = aliceToken.split(".");
-const tamperedToken = `${h}.${p}.${s.slice(0, -4)}XXXX`;
+const tamperedToken = `${h}.${p}.${(s ?? "").slice(0, -4)}XXXX`;
 r = await call("POST", "/api/events", validEvent, tamperedToken);
 record("3. Tampered signature returns 401", "401", `${r.status}`, r.status === 401);
 
