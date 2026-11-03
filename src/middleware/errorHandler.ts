@@ -33,6 +33,12 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     return;
   }
 
+  // Oversized payload from body-parser
+  if (err?.type === "entity.too.large") {
+    res.status(413).json({ success: false, message: "Payload too large. Request body exceeds the 100kb limit." });
+    return;
+  }
+
   // MongoDB duplicate key
   if (err?.code === 11000) {
     res.status(409).json({ success: false, message: "Duplicate record" });
