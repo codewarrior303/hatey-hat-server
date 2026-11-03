@@ -45,6 +45,7 @@ router.get(
     if (query.limit) cursor = cursor.limit(query.limit);
     const data = await cursor.toArray();
 
+    res.setHeader("Cache-Control", "public, max-age=30, s-maxage=60, stale-while-revalidate=120");
     res.json({ success: true, count: data.length, data });
   },
 );
@@ -62,6 +63,7 @@ router.get("/stats/summary", statsLimiter, async (_req, res) => {
     eventsColl.distinct("location"),
   ]);
 
+  res.setHeader("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=120");
   res.json({
     success: true,
     data: {
@@ -86,6 +88,7 @@ router.get("/:id", async (req, res) => {
   const event = await (await events()).findOne({ _id });
   if (!event) throw ApiError.notFound("Event not found");
   const participants = await (await joins()).countDocuments({ eventId: _id });
+  res.setHeader("Cache-Control", "public, max-age=30, s-maxage=60, stale-while-revalidate=120");
   res.json({ success: true, data: { ...event, participants } });
 });
 
