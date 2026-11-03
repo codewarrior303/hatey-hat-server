@@ -40,7 +40,7 @@ const seedEvents: SeedEvent[] = [
     description:
       "Together with local mosque committees and youth clubs, we are handing out 500 thick blankets to elderly people, day labourers and street-dwelling families around Mohammadpur Town Hall and Beribadh. Volunteers will verify lists, keep queues orderly and help carry blankets to people who cannot walk to the distribution point.",
     eventType: "Donation",
-    thumbnail: img("photo-1469571486292-0ba58a3f068b"),
+    thumbnail: img("photo-1607962837359-5e7e89f86776"),
     location: "Mohammadpur Town Hall, Dhaka",
     eventDate: daysFromNow(6, 19),
   },
@@ -67,7 +67,7 @@ const seedEvents: SeedEvent[] = [
     description:
       "Hot meals of khichuri, egg and a seasonal fruit will be packed and distributed to rickshaw pullers, porters and homeless families around Sadarghat and Chawkbazar. Volunteers will pack 800 meal boxes in the afternoon and distribute them in the evening in coordinated groups.",
     eventType: "Food Distribution",
-    thumbnail: img("photo-1593113598332-cd288d649433"),
+    thumbnail: img("photo-1593113630400-ea4288922497"),
     location: "Sadarghat Launch Terminal, Old Dhaka",
     eventDate: daysFromNow(13, 16),
   },
@@ -85,7 +85,7 @@ const seedEvents: SeedEvent[] = [
     description:
       "Every Saturday we run a learning circle for children living around Kamalapur Railway Station. This session focuses on Bangla reading, basic arithmetic and hand-washing habits. Volunteers will each mentor a small group of three to four children. No teaching experience required, just patience and kindness.",
     eventType: "Education",
-    thumbnail: img("photo-1497486751825-1233686d5d80"),
+    thumbnail: img("photo-1529390079861-591de354faf5"),
     location: "Kamalapur Railway Station, Dhaka",
     eventDate: daysFromNow(17, 15),
   },
@@ -103,7 +103,7 @@ const seedEvents: SeedEvent[] = [
     description:
       "Many children in Mirpur 1's informal settlements return to school without notebooks, pencils or bags. We will assemble and distribute 400 stationery kits donated by local businesses and neighbours. Volunteers will help pack kits by class level and hand them out with a short reading activity.",
     eventType: "Education",
-    thumbnail: img("photo-1509099836639-18ba1795216d"),
+    thumbnail: img("photo-1567057419565-4349c49d8a04"),
     location: "Shah Ali Bagh Community School, Mirpur 1, Dhaka",
     eventDate: daysFromNow(24, 10),
   },
@@ -112,7 +112,7 @@ const seedEvents: SeedEvent[] = [
     description:
       "Families in northern districts are recovering from seasonal floods. We are packing relief bags containing rice, lentils, oil, oral saline, sanitary pads and soap for shipment by truck. Volunteers are needed to weigh, pack, label and load bags. Lunch will be provided for all volunteers.",
     eventType: "Other",
-    thumbnail: img("photo-1559027615-cd4628902d4a"),
+    thumbnail: img("photo-1593113598332-cd288d649433"),
     location: "Tejgaon Industrial Area, Dhaka",
     eventDate: daysFromNow(28, 9, 30),
   },
