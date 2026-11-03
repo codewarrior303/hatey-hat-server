@@ -14,13 +14,30 @@ const cache: MongoCache =
 
 async function ensureIndexes(db: Db) {
   if (cache.indexesReady) return;
-  await Promise.all([
-    db.collection("events").createIndex({ eventDate: 1 }),
-    db.collection("events").createIndex({ creatorEmail: 1, eventDate: 1 }),
-    db.collection("joins").createIndex({ eventId: 1, userEmail: 1 }, { unique: true, name: "unique_event_user" }),
-    db.collection("joins").createIndex({ userEmail: 1, eventDate: 1 }),
-  ]);
-  cache.indexesReady = true;
+  try {
+    await Promise.all([
+      // Events indexes
+      db.collection("events").createIndex({ eventDate: 1 }, { name: "idx_events_eventDate" }),
+      db.collection("events").createIndex({ creatorEmail: 1, eventDate: 1 }, { name: "idx_events_creator_date" }),
+
+      // Joins unique constraint index (prevents duplicate joins at the database layer)
+      db.collection("joins").createIndex({ eventId: 1, userEmail: 1 }, { unique: true, name: "unique_event_user" }),
+      db.collection("joins").createIndex({ userEmail: 1, eventDate: 1 }, { name: "idx_joins_user_date" }),
+
+      // Rate limit counters TTL index (automatically drops expired rate limit records)
+      db.collection("rate_limits").createIndex({ expireAt: 1 }, { expireAfterSeconds: 0, name: "ttl_rate_limits" }),
+
+      // Security audit log TTL index (automatically retains audit logs for 30 days)
+      db.collection("security_audit").createIndex(
+        { timestamp: 1 },
+        { expireAfterSeconds: 60 * 60 * 24 * 30, name: "ttl_security_audit" },
+      ),
+      db.collection("security_audit").createIndex({ action: 1, timestamp: -1 }, { name: "idx_audit_action_time" }),
+    ]);
+    cache.indexesReady = true;
+  } catch (err) {
+    console.warn("[db] Non-fatal warning when ensuring indexes:", (err as any)?.message || err);
+  }
 }
 
 export async function getDb(): Promise<Db> {

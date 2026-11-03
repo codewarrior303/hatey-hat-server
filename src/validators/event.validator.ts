@@ -23,7 +23,7 @@ const httpUrl = z
   .trim()
   .url("Thumbnail must be a valid URL")
   .refine(
-    (value) => /^https?:\/\//i.test(value) && !/^(javascript|data|vbscript):/i.test(value),
+    (value) => /^https?:\/\//i.test(value) && !/^(javascript|data|vbscript|file):/i.test(value),
     "Thumbnail must start with http:// or https://"
   )
   .max(1000, "Thumbnail URL is too long");
