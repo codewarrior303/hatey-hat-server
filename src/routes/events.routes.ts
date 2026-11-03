@@ -3,6 +3,7 @@ import type { Filter } from "mongodb";
 import { getDb } from "../db/client.js";
 import { verifyJwt } from "../middleware/verifyJwt.js";
 import { validateBody } from "../middleware/validate.js";
+import { writeLimiter } from "../middleware/rateLimiter.js";
 import { ApiError } from "../utils/ApiError.js";
 import { escapeRegex, toObjectId } from "../utils/helpers.js";
 import type { EventDoc, JoinDoc } from "../types/models.js";
@@ -54,7 +55,7 @@ router.get("/:id", async (req, res) => {
 });
 
 /** POST /api/events – create. Creator identity comes from the verified JWT only. */
-router.post("/", verifyJwt, validateBody(createEventSchema), async (req, res) => {
+router.post("/", writeLimiter, verifyJwt, validateBody(createEventSchema), async (req, res) => {
   const user = req.user!;
   const body = req.body as CreateEventInput;
   const now = new Date();
@@ -79,7 +80,7 @@ async function findOwnedEvent(id: unknown, email: string) {
 }
 
 /** PATCH /api/events/:id – owner only. */
-router.patch("/:id", verifyJwt, validateBody(updateEventSchema), async (req, res) => {
+router.patch("/:id", writeLimiter, verifyJwt, validateBody(updateEventSchema), async (req, res) => {
   const event = await findOwnedEvent(req.params.id, req.user!.email);
   const body = req.body as UpdateEventInput;
 
@@ -102,7 +103,7 @@ router.patch("/:id", verifyJwt, validateBody(updateEventSchema), async (req, res
 });
 
 /** DELETE /api/events/:id – owner only. Also removes related joins. */
-router.delete("/:id", verifyJwt, async (req, res) => {
+router.delete("/:id", writeLimiter, verifyJwt, async (req, res) => {
   const event = await findOwnedEvent(req.params.id, req.user!.email);
   await (await events()).deleteOne({ _id: event._id });
   const removedJoins = await (await joins()).deleteMany({ eventId: event._id });
@@ -114,7 +115,7 @@ router.delete("/:id", verifyJwt, async (req, res) => {
 });
 
 /** POST /api/events/:id/join – join an upcoming event. Duplicate joins return 409. */
-router.post("/:id/join", verifyJwt, async (req, res) => {
+router.post("/:id/join", writeLimiter, verifyJwt, async (req, res) => {
   const user = req.user!;
   const _id = toObjectId(req.params.id, "event id");
   const event = await (await events()).findOne({ _id });

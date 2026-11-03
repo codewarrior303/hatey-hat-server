@@ -45,6 +45,7 @@ export const verifyJwt: RequestHandler = async (req, _res, next) => {
     const { payload } = await jwtVerify<BetterAuthPayload>(token, JWKS, {
       issuer: env.jwt.issuer,
       audience: env.jwt.audience,
+      algorithms: ["EdDSA", "RS256", "ES256"],
     });
 
     const email = payload.email?.toLowerCase();

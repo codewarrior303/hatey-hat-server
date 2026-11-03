@@ -1,7 +1,10 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 import { env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
+import { apiLimiter } from "./middleware/rateLimiter.js";
 import { getDb } from "./db/client.js";
 import eventsRouter from "./routes/events.routes.js";
 import joinsRouter from "./routes/joins.routes.js";
@@ -10,6 +13,13 @@ const app = express();
 
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
+
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  }),
+);
 
 app.use(
   cors({
@@ -24,6 +34,7 @@ app.use(
   }),
 );
 app.use(express.json({ limit: "100kb" }));
+app.use(apiLimiter);
 
 app.get("/", (_req, res) => {
   res.json({ success: true, message: "Hatey Hat API is running. Hate hat, ekshathe poth chola." });

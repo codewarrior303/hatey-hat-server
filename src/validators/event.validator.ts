@@ -22,7 +22,10 @@ const httpUrl = z
   .string({ error: "Thumbnail URL is required" })
   .trim()
   .url("Thumbnail must be a valid URL")
-  .refine((value) => /^https?:\/\//i.test(value), "Thumbnail must start with http:// or https://")
+  .refine(
+    (value) => /^https?:\/\//i.test(value) && !/^(javascript|data|vbscript):/i.test(value),
+    "Thumbnail must start with http:// or https://"
+  )
   .max(1000, "Thumbnail URL is too long");
 
 export const createEventSchema = z
@@ -60,7 +63,7 @@ export const listEventsQuerySchema = z.object({
     .optional()
     .transform((value) => (value && value !== "all" ? value : undefined)),
   limit: z.coerce.number().int().min(1, "Limit must be at least 1").max(60, "Limit must be at most 60").optional(),
-});
+}).strict();
 
 export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;
