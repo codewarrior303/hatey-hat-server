@@ -3,6 +3,8 @@ import cors from "cors";
 import { env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { getDb } from "./db/client.js";
+import eventsRouter from "./routes/events.routes.js";
+import joinsRouter from "./routes/joins.routes.js";
 
 const app = express();
 
@@ -41,6 +43,9 @@ app.get("/api/health", async (_req, res) => {
     data: { status: database === "up" ? "ok" : "degraded", database, timestamp: new Date().toISOString() },
   });
 });
+
+app.use("/api/events", eventsRouter);
+app.use("/api/joins", joinsRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
