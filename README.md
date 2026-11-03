@@ -9,8 +9,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Native%20Driver-47a248?style=flat-square&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel&logoColor=white)](https://hatey-hat-api.vercel.app)
 
-**Live Production API:** [https://hatey-hat-api.vercel.app](https://hatey-hat-api.vercel.app)  
-**Client Web Application:** [https://hatey-hat.vercel.app](https://hatey-hat.vercel.app)
+**Live Production API:** [https://hatey-hat-api.vercel.app](https://hatey-hat-api.vercel.app)
 
 ---
 
@@ -75,64 +74,6 @@
 | :--- | :--- | :---: | :--- |
 | `GET` | `/api/stats` | No | Live counters: active initiatives, volunteers joined, and community categories. |
 
----
-
-## Environment Configuration
-
-Create a `.env` file in the root of `server/` modeled after `.env.example`:
-
-```bash
-PORT=5000
-NODE_ENV=development
-CLIENT_URL=http://localhost:3000
-MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/hatey-hat?retryWrites=true&w=majority
-BETTER_AUTH_URL=http://localhost:3000
-BETTER_AUTH_SECRET=your-better-auth-secret-min-32-chars-long
-```
-
----
-
-## Local Development & Setup
-
-### Prerequisites
-- **Node.js** >= 20.x
-- **npm** >= 10.x
-- **MongoDB Atlas** or a local MongoDB instance
-
-### Installation
-```bash
-# Navigate to the server folder
-cd server
-
-# Install dependencies
-npm install
-
-# Run TypeScript compilation in watch mode
-npm run dev
-
-# Run static type checking
-npm run typecheck
-
-# Production build
-npm run build
-
-# Start production server
-npm start
-```
-
----
-
-## Deployment (Vercel Serverless)
-
-The API is fully optimized for Vercel Serverless Functions via [`api/index.ts`](file:///home/abir/Desktop/programming-hero/assingment/Social Event Managment/server/api/index.ts) and [`vercel.json`](file:///home/abir/Desktop/programming-hero/assingment/Social Event Managment/server/vercel.json):
-
-1. Set Environment Variables in Vercel Dashboard:
-   - `MONGODB_URI`
-   - `CLIENT_URL`
-   - `BETTER_AUTH_URL`
-   - `BETTER_AUTH_SECRET`
-2. Connect your Git repository to Vercel and set the Root Directory to `server`.
-3. Deployments trigger automatically on push to `main`.
 
 ---
 
