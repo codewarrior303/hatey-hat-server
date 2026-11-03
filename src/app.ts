@@ -8,6 +8,7 @@ import { apiLimiter } from "./middleware/rateLimiter.js";
 import { getDb } from "./db/client.js";
 import eventsRouter from "./routes/events.routes.js";
 import joinsRouter from "./routes/joins.routes.js";
+import subscribersRouter from "./routes/subscribers.routes.js";
 
 const app = express();
 
@@ -89,6 +90,7 @@ app.get("/api/health", async (_req, res) => {
 
 app.use("/api/events", eventsRouter);
 app.use("/api/joins", joinsRouter);
+app.use("/api/subscribers", subscribersRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

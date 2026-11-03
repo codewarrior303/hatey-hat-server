@@ -33,6 +33,9 @@ async function ensureIndexes(db: Db) {
         { expireAfterSeconds: 60 * 60 * 24 * 30, name: "ttl_security_audit" },
       ),
       db.collection("security_audit").createIndex({ action: 1, timestamp: -1 }, { name: "idx_audit_action_time" }),
+
+      // Newsletter subscribers unique email index
+      db.collection("subscribers").createIndex({ email: 1 }, { unique: true, name: "unique_subscriber_email" }),
     ]);
     cache.indexesReady = true;
   } catch (err) {
