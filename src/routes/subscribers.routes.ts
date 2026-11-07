@@ -15,9 +15,14 @@ router.get("/status", verifyJwt, async (req, res, next) => {
     const collection = db.collection("subscribers");
 
     const existing = await collection.findOne({ email: userEmail });
+    const isSubscribed = Boolean(existing);
     return res.status(200).json({
       success: true,
-      isSubscribed: Boolean(existing),
+      data: {
+        isSubscribed,
+        email: userEmail,
+      },
+      isSubscribed,
       email: userEmail,
     });
   } catch (err) {
