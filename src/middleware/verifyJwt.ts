@@ -109,3 +109,40 @@ export const verifyJwt: RequestHandler = async (req, res, next) => {
     next(ApiError.unauthorized(message));
   }
 };
+
+/**
+ * Optional JWT verifier: If a valid Bearer token is provided, populates `req.user`.
+ * If missing or invalid, proceeds without failing, allowing public or query-based fallback.
+ */
+export const optionalVerifyJwt: RequestHandler = async (req, res, next) => {
+  const header = req.headers.authorization;
+  if (!header?.startsWith("Bearer ")) {
+    return next();
+  }
+  const token = header.slice("Bearer ".length).trim();
+  if (!token) return next();
+
+  try {
+    const { payload } = await jwtVerify<BetterAuthPayload>(token, JWKS, {
+      issuer: env.jwt.issuer,
+      audience: env.jwt.audience,
+      algorithms: ["EdDSA", "RS256", "ES256"],
+      clockTolerance: "15s",
+    });
+
+    const email = payload.email?.toLowerCase();
+    const id = payload.id ?? payload.sub;
+    if (email && id) {
+      req.user = {
+        id,
+        email,
+        name: payload.name?.trim() || email.split("@")[0]!,
+        image: payload.image ?? null,
+      };
+    }
+  } catch {
+    // Non-fatal: proceed as unauthenticated guest
+  }
+
+  next();
+};

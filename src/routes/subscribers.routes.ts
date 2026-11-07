@@ -1,16 +1,34 @@
 import { Router } from "express";
 import { getDb } from "../db/client.js";
-import { verifyJwt } from "../middleware/verifyJwt.js";
+import { verifyJwt, optionalVerifyJwt } from "../middleware/verifyJwt.js";
 
 const router = Router();
 
 /**
  * GET /api/subscribers/status
- * Check if the currently authenticated user is subscribed to the newsletter.
+ * Check if a user/email is subscribed to the newsletter.
+ * Supports authenticated user (Bearer JWT) OR explicit query `?email=...`.
+ * Guaranteed to return 200 with `{ isSubscribed: boolean }` and never throw 401 on status checks.
  */
-router.get("/status", verifyJwt, async (req, res, next) => {
+router.get("/status", optionalVerifyJwt, async (req, res, next) => {
   try {
-    const userEmail = req.user!.email.toLowerCase();
+    const rawEmail =
+      req.user?.email ||
+      (typeof req.query.email === "string" ? req.query.email : "");
+    const userEmail = rawEmail.toLowerCase().trim();
+
+    if (!userEmail) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          isSubscribed: false,
+          email: null,
+        },
+        isSubscribed: false,
+        email: null,
+      });
+    }
+
     const db = await getDb();
     const collection = db.collection("subscribers");
 
@@ -47,6 +65,8 @@ router.post("/", verifyJwt, async (req, res, next) => {
         success: true,
         message: "You are already subscribed to community updates!",
         data: { email: userEmail, isSubscribed: true },
+        isSubscribed: true,
+        email: userEmail,
       });
     }
 
@@ -63,6 +83,8 @@ router.post("/", verifyJwt, async (req, res, next) => {
       success: true,
       message: "Thank you for subscribing to community updates!",
       data: { id: result.insertedId.toString(), email: userEmail, isSubscribed: true },
+      isSubscribed: true,
+      email: userEmail,
     });
   } catch (err) {
     next(err);
@@ -71,11 +93,22 @@ router.post("/", verifyJwt, async (req, res, next) => {
 
 /**
  * POST /api/subscribers/unsubscribe
- * Unsubscribe the authenticated user from the community newsletter.
+ * Unsubscribe the authenticated user (or provided email) from the community newsletter.
  */
-router.post("/unsubscribe", verifyJwt, async (req, res, next) => {
+router.post("/unsubscribe", optionalVerifyJwt, async (req, res, next) => {
   try {
-    const userEmail = req.user!.email.toLowerCase();
+    const rawEmail =
+      req.user?.email ||
+      (typeof req.body?.email === "string" ? req.body.email : "");
+    const userEmail = rawEmail.toLowerCase().trim();
+
+    if (!userEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Email address is required to unsubscribe.",
+      });
+    }
+
     const db = await getDb();
     const collection = db.collection("subscribers");
 
@@ -85,6 +118,8 @@ router.post("/unsubscribe", verifyJwt, async (req, res, next) => {
       success: true,
       message: "You have been unsubscribed from community updates.",
       data: { email: userEmail, isSubscribed: false },
+      isSubscribed: false,
+      email: userEmail,
     });
   } catch (err) {
     next(err);
@@ -95,9 +130,20 @@ router.post("/unsubscribe", verifyJwt, async (req, res, next) => {
  * DELETE /api/subscribers
  * Also allows DELETE for RESTful unsubscribing.
  */
-router.delete("/", verifyJwt, async (req, res, next) => {
+router.delete("/", optionalVerifyJwt, async (req, res, next) => {
   try {
-    const userEmail = req.user!.email.toLowerCase();
+    const rawEmail =
+      req.user?.email ||
+      (typeof req.body?.email === "string" ? req.body.email : "");
+    const userEmail = rawEmail.toLowerCase().trim();
+
+    if (!userEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Email address is required to unsubscribe.",
+      });
+    }
+
     const db = await getDb();
     const collection = db.collection("subscribers");
 
@@ -107,6 +153,8 @@ router.delete("/", verifyJwt, async (req, res, next) => {
       success: true,
       message: "You have been unsubscribed from community updates.",
       data: { email: userEmail, isSubscribed: false },
+      isSubscribed: false,
+      email: userEmail,
     });
   } catch (err) {
     next(err);
